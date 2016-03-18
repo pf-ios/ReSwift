@@ -27,6 +27,10 @@ public class Store<State: StateType>: StoreType {
             subscriptions.forEach {
                 // if a selector is available, subselect the relevant state
                 // otherwise pass the entire state to the subscriber
+                if let selector = $0.markablesSelector {
+                    if selector.filter({$0(state).updated}).isEmpty  { return }
+                }
+                
                 $0.subscriber?._newState($0.selector?(state) ?? state)
             }
         }
@@ -80,9 +84,15 @@ public class Store<State: StateType>: StoreType {
     public func subscribe<SelectedState, S: StoreSubscriber
         where S.StoreSubscriberStateType == SelectedState>
         (subscriber: S, selector: (State -> SelectedState)?) {
+            subscribe(subscriber, selector: selector, markablesSelector: nil)
+    }
+    
+    public func subscribe<SelectedState, S: StoreSubscriber
+        where S.StoreSubscriberStateType == SelectedState>
+        (subscriber: S, selector: (State -> SelectedState)?, markablesSelector: [(State -> MarkableStateType)]?) {
             if !_isNewSubscriber(subscriber) { return }
-
-            subscriptions.append(Subscription(subscriber: subscriber, selector: selector))
+    
+            subscriptions.append(Subscription(subscriber: subscriber, selector: selector, markablesSelector:markablesSelector))
 
             if let state = self.state {
                 subscriber._newState(selector?(state) ?? state)
