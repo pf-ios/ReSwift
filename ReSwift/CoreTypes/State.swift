@@ -9,6 +9,6 @@
 import Foundation
 
 public protocol StateType { }
-public protocol MarkableStateType {
-    var updated:Bool { get }
+public protocol Markable {
+    var updated: Bool { get }
 }
