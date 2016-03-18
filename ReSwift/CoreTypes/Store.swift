@@ -87,7 +87,7 @@ public class Store<State: StateType>: StoreType {
     
     public func subscribe<SelectedState, S: StoreSubscriber
         where S.StoreSubscriberStateType == SelectedState>
-        (subscriber: S, selector: (State -> SelectedState)?, markablesSelector: [(State -> MarkableStateType)]?) {
+        (subscriber: S, selector: (State -> SelectedState)?, markablesSelector: [(State -> Markable)]?) {
             if !_isNewSubscriber(subscriber) { return }
     
             subscriptions.append(Subscription(subscriber: subscriber, selector: selector, markablesSelector:markablesSelector))
