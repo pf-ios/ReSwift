@@ -27,7 +27,7 @@ public class Store<State: StateType>: StoreType {
             subscriptions.forEach {
                 // if a selector is available, subselect the relevant state
                 // otherwise pass the entire state to the subscriber
-                if let selector = $0.markablesSelector where selector(state).filter({$0.updated}).isEmpty { return }
+                if let selector = $0.markablesSelector where selector(state).filter({$0.isMarkedUpdated()}).isEmpty { return }
 
                 $0.subscriber?._newState($0.selector?(state) ?? state)
             }

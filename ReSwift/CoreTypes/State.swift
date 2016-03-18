@@ -10,5 +10,11 @@ import Foundation
 
 public protocol StateType { }
 public protocol Markable {
-    var updated: Bool { get }
+    func isMarkedUpdated() -> Bool
+}
+
+extension Markable {
+    func isMarkedUpdated() -> Bool {
+        return false
+    }
 }
