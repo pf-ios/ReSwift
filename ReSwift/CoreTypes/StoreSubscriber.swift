@@ -21,7 +21,9 @@ public protocol StoreSubscriber: AnyStoreSubscriber {
 extension StoreSubscriber {
     public func _newState(state: Any) {
         if let typedState = state as? StoreSubscriberStateType {
-            newState(state: typedState)
+            DispatchQueue.main.async { [unowned self] in
+                self.newState(state: typedState)
+            }
         }
     }
 }
