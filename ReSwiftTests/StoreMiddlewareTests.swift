@@ -9,66 +9,64 @@
 import XCTest
 import ReSwift
 
-let firstMiddleware: Middleware = { dispatch, getState in
+let firstMiddleware: Middleware<StateType> = { dispatch, getState in
     return { next in
         return { action in
 
             if var action = action as? SetValueStringAction {
-                action.value = action.value + " First Middleware"
-                return next(action)
+                action.value += " First Middleware"
+                next(action)
             } else {
-                return next(action)
+                next(action)
             }
         }
     }
 }
 
-let secondMiddleware: Middleware = { dispatch, getState in
+let secondMiddleware: Middleware<StateType> = { dispatch, getState in
     return { next in
         return { action in
 
             if var action = action as? SetValueStringAction {
-                action.value = action.value + " Second Middleware"
-                return next(action)
+                action.value += " Second Middleware"
+                next(action)
             } else {
-                return next(action)
+                next(action)
             }
         }
     }
 }
 
-let dispatchingMiddleware: Middleware = { dispatch, getState in
+let dispatchingMiddleware: Middleware<StateType> = { dispatch, getState in
     return { next in
         return { action in
 
             if var action = action as? SetValueAction {
-                _ = dispatch?(SetValueStringAction("\(action.value)"))
-
-                return "Converted Action Successfully"
+                dispatch(SetValueStringAction("\(action.value ?? 0)"))
             }
 
-            return next(action)
+            next(action)
         }
     }
 }
 
-let stateAccessingMiddleware: Middleware = { dispatch, getState in
+let stateAccessingMiddleware: Middleware<TestStringAppState> = { dispatch, getState in
     return { next in
         return { action in
 
-            let appState = getState() as? TestStringAppState,
+            let appState = getState(),
                 stringAction = action as? SetValueStringAction
 
             // avoid endless recursion by checking if we've dispatched exactly this action
             if appState?.testValue == "OK" && stringAction?.value != "Not OK" {
                 // dispatch a new action
-                _ = dispatch?(SetValueStringAction("Not OK"))
+                dispatch(SetValueStringAction("Not OK"))
 
                 // and swallow the current one
-                return next(StandardAction(type: "No-Op-Action"))
+                next(NoOpAction())
+            } else {
+                next(action)
             }
-
-            return next(action)
         }
     }
 }
@@ -110,21 +108,6 @@ class StoreMiddlewareTests: XCTestCase {
         store.dispatch(action)
 
         XCTAssertEqual(store.state.testValue, "10 First Middleware Second Middleware")
-    }
-
-    /**
-     it can change the return value of the dispatch function
-     */
-    func testCanChangeReturnValue() {
-        let reducer = TestValueStringReducer()
-        let store = Store<TestStringAppState>(reducer: reducer.handleAction,
-            state: TestStringAppState(),
-            middleware: [firstMiddleware, secondMiddleware, dispatchingMiddleware])
-
-        let action = SetValueAction(10)
-        let returnValue = store.dispatch(action) as? String
-
-        XCTAssertEqual(returnValue, "Converted Action Successfully")
     }
 
     /**

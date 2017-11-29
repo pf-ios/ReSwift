@@ -24,16 +24,6 @@ class StoreDispatchTests: XCTestCase {
     }
 
     /**
-     it returns the dispatched action
-     */
-    func testReturnsDispatchedAction() {
-        let action = SetValueAction(10)
-        let returnValue = store.dispatch(action)
-
-        XCTAssertEqual((returnValue as? SetValueAction)?.value, action.value)
-    }
-
-    /**
      it throws an exception when a reducer dispatches an action
      */
     func testThrowsExceptionWhenReducersDispatch() {
@@ -68,9 +58,9 @@ class StoreDispatchTests: XCTestCase {
             withDescription: "It accepts async action creators")
 
         let asyncActionCreator: Store<TestAppState>.AsyncActionCreator = { _, _, callback in
-            dispatchAsync() {
+            dispatchAsync {
                 // Provide the callback with an action creator
-                callback { state, store in
+                callback { _, _ in
                     return SetValueAction(5)
                 }
             }
@@ -100,9 +90,9 @@ class StoreDispatchTests: XCTestCase {
             "It calls the callback once state update from async action is complete")
 
         let asyncActionCreator: Store<TestAppState>.AsyncActionCreator = { _, _, callback in
-            dispatchAsync() {
+            dispatchAsync {
                 // Provide the callback with an action creator
-                callback { state, store in
+                callback { _, _ in
                     return SetValueAction(5)
                 }
             }
@@ -125,7 +115,7 @@ class StoreDispatchTests: XCTestCase {
 
 // Needs to be class so that shared reference can be modified to inject store
 class DispatchingReducer: XCTestCase {
-    var store: Store<TestAppState>? = nil
+    var store: Store<TestAppState>?
 
     func handleAction(action: Action, state: TestAppState?) -> TestAppState {
         expectFatalError {
