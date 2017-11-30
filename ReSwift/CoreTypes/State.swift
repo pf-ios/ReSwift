@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol StateType { }
-public protocol Markable: Equatable {
+public protocol Markable {
     var updatedAt: Date { get set }
     var isUpdated: Bool { get set }
     func setUpdated()
@@ -20,7 +20,9 @@ extension Markable {
         isUpdated = updated
         updatedAt = Date()
     }
-    
+}
+
+extension Markable: Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.updatedAt == rhs.updatedAt
     }
