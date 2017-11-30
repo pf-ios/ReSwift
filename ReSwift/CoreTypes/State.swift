@@ -9,19 +9,3 @@
 import Foundation
 
 public protocol StateType { }
-public protocol Markable: Equatable {
-    var updatedAt: Date { get set }
-    var isUpdated: Bool { get set }
-    func setUpdated()
-}
-
-extension Markable {
-    mutating func setUpdated(_ updated: Bool = true) {
-        isUpdated = updated
-        updatedAt = Date()
-    }
-    
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs.updatedAt == rhs.updatedAt
-    }
-}
