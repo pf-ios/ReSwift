@@ -40,36 +40,18 @@ open class Store<State: StateType>: StoreType {
 
     private var isDispatching = false
 
-    /// Indicates if new subscriptions attempt to apply `skipRepeats` 
-    /// by default.
-    fileprivate let subscriptionsAutomaticallySkipRepeats: Bool
-
-    /// Initializes the store with a reducer, an initial state and a list of middleware.
-    ///
-    /// Middleware is applied in the order in which it is passed into this constructor.
-    ///
-    /// - parameter reducer: Main reducer that processes incomind actions.
-    /// - parameter state: Initial state, if any. Can be `nil` and will be 
-    ///   provided by the reducer in that case.
-    /// - parameter middleware: Ordered list of action pre-processors, acting 
-    ///   before the root reducer.
-    /// - parameter automaticallySkipsRepeats: If `true`, the store will attempt 
-    ///   to skip idempotent state updates when a subscriber's state type 
-    ///   implements `Equatable`. Defaults to `true`.
     public required init(
         reducer: @escaping Reducer<State>,
         state: State?,
-        middleware: [Middleware<State>] = [],
-        automaticallySkipsRepeats: Bool = true
+        middleware: [Middleware<State>] = []
     ) {
-        self.subscriptionsAutomaticallySkipRepeats = automaticallySkipsRepeats
         self.reducer = reducer
 
         // Wrap the dispatch function with all middlewares
         self.dispatchFunction = middleware
             .reversed()
             .reduce({ [unowned self] action in
-                self._defaultDispatch(action: action)
+                return self._defaultDispatch(action: action)
             }) { dispatchFunction, middleware in
                 // If the store get's deinitialized before the middleware is complete; drop
                 // the action without dispatching.
@@ -131,7 +113,7 @@ open class Store<State: StateType>: StoreType {
             subscriber: subscriber
         )
     }
-    
+
     open func unsubscribe(_ subscriber: AnyStoreSubscriber) {
         if let index = subscriptions.index(where: { return $0.subscriber === subscriber }) {
             subscriptions.remove(at: index)
@@ -198,10 +180,6 @@ open class Store<State: StateType>: StoreType {
 extension Store where State: Equatable {
     open func subscribe<S: StoreSubscriber>(_ subscriber: S)
         where S.StoreSubscriberStateType == State {
-            guard subscriptionsAutomaticallySkipRepeats else {
-                _ = subscribe(subscriber, transform: nil)
-                return
-            }
             _ = subscribe(subscriber, transform: { $0.skipRepeats() })
     }
 }
