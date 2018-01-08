@@ -139,8 +139,8 @@ open class Store<State: StateType>: StoreType {
     }
 
     open func dispatch(_ action: Action) {
-        DispatchQueue.main.async {
-            dispatchFunction(action)
+        DispatchQueue.main.async { [weak self] in
+            self?.dispatchFunction(action)
         }
     }
 
