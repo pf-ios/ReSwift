@@ -139,7 +139,9 @@ open class Store<State: StateType>: StoreType {
     }
 
     open func dispatch(_ action: Action) {
-        dispatchFunction(action)
+        DispatchQueue.main.async {
+            dispatchFunction(action)
+        }
     }
 
     open func dispatch(_ actionCreatorProvider: @escaping ActionCreator) {
