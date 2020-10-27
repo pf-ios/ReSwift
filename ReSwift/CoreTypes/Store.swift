@@ -52,7 +52,7 @@ open class Store<State: StateType>: StoreType {
             .reversed()
             .reduce({ [unowned self] action in
                 return self._defaultDispatch(action: action)
-            }) { dispatchFunction, middleware in
+            } as DispatchFunction) { dispatchFunction, middleware in
                 // If the store get's deinitialized before the middleware is complete; drop
                 // the action without dispatching.
                 let dispatch: (Action) -> Void = { [weak self] in self?.dispatch($0) }
